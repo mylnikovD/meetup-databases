@@ -3,7 +3,7 @@ const DBTypes = require('../config/DBMS_types');
 
 module.exports = router => {
   /* GET users listing. */
-  router.get("/", controller.getUsers );
+  router.get(`/${DBTypes.SEQUELIZE}`, controller.getUsersSequelize );
   router.post(`/${DBTypes.SEQUELIZE}`, controller.createUserSequelize)
 
 };

@@ -1,10 +1,18 @@
+const { Op } = require('sequelize');
 const UserApi = require("../models").User;
+const db = require('../models');
 
-const getUsers = async (req, res) => {
+const getUsersSequelize = async (req, res) => {
   try {
-    const users = await UserApi.findAll({
-      include: ['Role', 'Posts'],
-      attributes: { exclude: ["password", 'createdAt', 'updatedAt'] }
+    const {limit, offset, name} = req.query;
+    const users = await UserApi.findAndCountAll({
+      where: name ? {fullname: {[Op.iLike]: `%${name}%`}} : null,
+      include: [ 'Role'],
+      order: [['id', 'ASC']],
+      limit,
+      offset,
+      attributes: { exclude: ["password", 'createdAt', 'updatedAt'] },
+      distinct: true
     });
     return res.status(200).send(users);
   } catch (error) {
@@ -15,6 +23,7 @@ const getUsers = async (req, res) => {
 const createUserSequelize = async (req, res) => {
   try {
     const newUserData = req.body;
+    newUserData.roleID = 2;
     const newUser = await UserApi.create(newUserData);
     return res.status(200).send(newUser);
   } catch (error) {
@@ -23,6 +32,6 @@ const createUserSequelize = async (req, res) => {
 }
 
 module.exports = {
-  getUsers,
+  getUsersSequelize,
   createUserSequelize
 };
