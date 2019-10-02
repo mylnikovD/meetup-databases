@@ -1,9 +1,12 @@
-var express = require('express');
-var router = express.Router();
+const changeCase = require('change-case');
+const express = require('express');
+const routes = require('require-dir')();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
+module.exports = (app) => {
+  Object.keys(routes).forEach((routeName) => {
+    const router = express.Router();
+    // eslint-disable-next-line
+    require(`./${routeName}`)(router);
+    app.use(`/${changeCase.paramCase(routeName)}`, router);
+  });
+};

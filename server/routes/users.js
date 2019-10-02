@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
+const controller = require('../controllers/users');
+const DBTypes = require('../config/DBMS_types');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+module.exports = router => {
+  /* GET users listing. */
+  router.get("/", controller.getUsers );
+  router.post(`/${DBTypes.SEQUELIZE}`, controller.createUserSequelize)
 
-module.exports = router;
+};
