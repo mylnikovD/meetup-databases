@@ -12,7 +12,7 @@ const App: React.FC = () => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(2);
   const [nameQuery, setNameQuery] = React.useState("");
-  const [totalCount, setTotalCount] = React.useState(0)
+  const [totalCount, setTotalCount] = React.useState(0);
 
   const [selectedTab, setSelectedTab] = React.useState(0);
 
@@ -21,12 +21,18 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    getUsers();
-  }, [page]);
+    getUsers(selectedTab, nameQuery, page, rowsPerPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage, selectedTab]);
 
-  const getUsers = async () => {
+  const getUsers = async (
+    selectedTab: number,
+    nameQuery: string,
+    page: number,
+    rowsPerPage: number
+  ) => {
     const users = await api.getUsers(
-      selectedTab === 0 ? 'sequelize' : '',
+      selectedTab === 0 ? "sequelize" : "",
       nameQuery,
       page * rowsPerPage,
       rowsPerPage
@@ -36,8 +42,8 @@ const App: React.FC = () => {
   };
 
   const createNewUser = async (type: string, data: NewUserData) => {
-    const newUser = await api.createUser(type, data);
-    setUsers([...users, newUser]);
+    await api.createUser(type, data);
+    getUsers(selectedTab, nameQuery, page, rowsPerPage);
   };
 
   const getPosts = async (type: string, authorID: number) => {
@@ -45,9 +51,30 @@ const App: React.FC = () => {
     setPosts(posts);
   };
 
+  const editPost = async (type: string, postID: number, value: string) => {
+    const updatedPost = await api.editPost(type, postID, value);
+    if (!updatedPost || !updatedPost.length) return;
+    return setPosts(prevPosts =>
+      prevPosts.map(prevPost => {
+        if (prevPost.id === updatedPost[1].id) {
+          return updatedPost[1];
+        }
+        return prevPost;
+      })
+    );
+  };
+
+  const deletePost = async (type: string, postID: number) => {
+    const deletedPost = await api.deletePost(type, postID);
+    if (!deletedPost) return;
+    return setPosts(prevPosts =>
+      prevPosts.filter(prevPost => prevPost.id !== postID)
+    );
+  };
+
   const handleSearchButton = async () => {
-    await getUsers();
-  }
+    await getUsers(selectedTab, nameQuery, page, rowsPerPage);
+  };
 
   return (
     <div className="App">
@@ -78,7 +105,12 @@ const App: React.FC = () => {
             setNameQuery={setNameQuery}
             handleSearchButton={handleSearchButton}
           />
-          <PostsList posts={posts} />
+          <PostsList
+            posts={posts}
+            type="sequelize"
+            editPost={editPost}
+            deletePost={deletePost}
+          />
         </>
       )}
     </div>

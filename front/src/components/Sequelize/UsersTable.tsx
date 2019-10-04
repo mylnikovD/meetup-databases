@@ -8,6 +8,9 @@ import TextField from "@material-ui/core/TextField";
 import TablePagination from "@material-ui/core/TablePagination";
 import Button from "@material-ui/core/Button";
 import Modal from "@material-ui/core/Modal";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import InputLabel from "@material-ui/core/InputLabel";
 import { User, NewUserData } from "../../api";
 
 type UsersTableProps = {
@@ -43,13 +46,21 @@ export default function UsersTable(props: UsersTableProps) {
     fullname: "",
     email: "",
     age: 0,
-    username: ""
+    username: "",
+    roleID: 2
   });
   const [open, setOpen] = React.useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewUser({ ...newUser, [name]: value });
+    setNewUser(prevUser => ({ ...prevUser, [name]: value }));
+  };
+
+  const handleSelectChange = (
+    e: React.ChangeEvent<{ name?: string; value: unknown }>
+  ) => {
+    const { name, value } = e.target;
+    setNewUser(prevUser => ({ ...prevUser, [name!]: value }));
   };
 
   const createNewUser = () => {
@@ -160,6 +171,20 @@ export default function UsersTable(props: UsersTableProps) {
             type="number"
             value={newUser.age}
           />
+          <InputLabel style={{ marginTop: "10px" }} htmlFor="role-simple">
+            Role
+          </InputLabel>
+          <Select
+            value={newUser.roleID}
+            onChange={handleSelectChange}
+            inputProps={{
+              name: "roleID",
+              id: "role-simple"
+            }}
+          >
+            <MenuItem value={1}>Admin</MenuItem>
+            <MenuItem value={2}>User</MenuItem>
+          </Select>
           <div
             style={{
               justifyContent: "center",

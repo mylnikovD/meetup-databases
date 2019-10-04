@@ -10,7 +10,7 @@ export interface User {
   avatar?: string;
   Role: {
     title: string;
-  }
+  };
 }
 
 export interface Post {
@@ -24,6 +24,7 @@ export type NewUserData = {
   email: string;
   age: number;
   username: string;
+  roleID: number;
 };
 
 const apiCaller = async (args: AxiosRequestConfig) => {
@@ -39,6 +40,12 @@ const apiCaller = async (args: AxiosRequestConfig) => {
 };
 
 const api = {
+  getRoles: (type: string) => {
+    return apiCaller({
+      url: `${config.url}/roles/${type}`,
+      method: "GET"
+    }).then(response => response.data);
+  },
   getUsers: (type: string, name: string, offset: number, limit: number) => {
     return apiCaller({
       url: `${config.url}/users/${type}`,
@@ -65,6 +72,29 @@ const api = {
         authorID
       }
     }).then(response => response.data);
+  },
+  editPost: (type: string, postID: number, value: string) => {
+    return apiCaller({
+      url: `${config.url}/posts/${type}/${postID}`,
+      method: "PUT",
+      data: {
+        value
+      }
+    })
+      .then(response => response.data)
+      .catch(error => {
+        return alert(error.message + " Rollback initiated");
+      });
+  },
+  deletePost: (type: string, postID: number) => {
+    return apiCaller({
+      url: `${config.url}/posts/${type}/${postID}`,
+      method: "DELETE"
+    })
+      .then(response => response.data)
+      .catch(error => {
+        return alert(error.message + " Rollback initiated");
+      });
   }
 };
 

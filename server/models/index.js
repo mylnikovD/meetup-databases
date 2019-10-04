@@ -9,15 +9,33 @@ const config = require(__dirname + "/../config/config.json")[env];
 const db = {};
 
 let sequelize;
+
+let sequelizeReplicaConfig = {
+  replication: {
+    read: [
+      {
+        host: "127.0.0.1",
+        username: "postgres",
+        password: "postgres",
+        database: 'fusionsite'
+      }
+    ],
+    write: {
+      host: "127.0.0.1",
+      username: "postgres",
+      password: "postgres",
+      database: 'fusionsite'
+    }
+  }
+};
+
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  sequelize = new Sequelize(
-    config.database,
-    config.username,
-    config.password,
-    config
-  );
+  sequelize = new Sequelize(config.database, config.username, config.password, {
+    ...config,
+    // ...sequelizeReplicaConfig
+  });
 }
 
 fs.readdirSync(__dirname)

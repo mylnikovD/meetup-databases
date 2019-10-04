@@ -23,8 +23,10 @@ const getUsersSequelize = async (req, res) => {
 const createUserSequelize = async (req, res) => {
   try {
     const newUserData = req.body;
-    newUserData.roleID = 2;
-    const newUser = await UserApi.create(newUserData);
+    let newUser = await UserApi.create(newUserData, {
+      include: ['Role']
+    });
+    newUser = await newUser.reload();
     return res.status(200).send(newUser);
   } catch (error) {
     return res.status(500).send(error.message);
