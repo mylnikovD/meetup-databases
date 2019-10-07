@@ -32,13 +32,16 @@ const App: React.FC = () => {
     rowsPerPage: number
   ) => {
     const users = await api.getUsers(
-      selectedTab === 0 ? "sequelize" : "",
+      selectedTab === 0 ? "sequelize" : "bookshelf",
       nameQuery,
       page * rowsPerPage,
       rowsPerPage
     );
-    setTotalCount(users.count);
-    return setUsers(users.rows);
+    if (selectedTab === 0) {
+      setTotalCount(users.count);
+      return setUsers(users.rows);
+    }
+    return setUsers(users)
   };
 
   const createNewUser = async (type: string, data: NewUserData) => {
@@ -85,7 +88,7 @@ const App: React.FC = () => {
           aria-label="simple tabs example"
         >
           <Tab label="Sequelize" />
-          <Tab label="Item Two" />
+          <Tab label="Bookshelf/Knex" />
           <Tab label="Item Three" />
         </Tabs>
       </AppBar>
@@ -108,6 +111,30 @@ const App: React.FC = () => {
           <PostsList
             posts={posts}
             type="sequelize"
+            editPost={editPost}
+            deletePost={deletePost}
+          />
+        </>
+      )}
+      {selectedTab === 1 && (
+        <>
+          <UsersTable
+            users={users}
+            totalCount={totalCount}
+            type="bookshelf"
+            createNewUser={createNewUser}
+            getPostsByID={getPosts}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            setPage={setPage}
+            setRowsPerPage={setRowsPerPage}
+            nameQuery={nameQuery}
+            setNameQuery={setNameQuery}
+            handleSearchButton={handleSearchButton}
+          />
+          <PostsList
+            posts={posts}
+            type="bookshelf"
             editPost={editPost}
             deletePost={deletePost}
           />

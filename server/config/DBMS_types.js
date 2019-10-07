@@ -1,3 +1,4 @@
 module.exports = {
-  SEQUELIZE: 'sequelize'
+  SEQUELIZE: 'sequelize',
+  BOOKSHELF: 'bookshelf'
 }
