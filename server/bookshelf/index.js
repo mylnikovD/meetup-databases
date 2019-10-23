@@ -12,7 +12,6 @@ const knex = require("knex")({
   }
 });
 const bookshelf = require("bookshelf")(knex);
-
 // Defining models
 
 const Role = bookshelf.model("Role", {
@@ -24,6 +23,7 @@ const Role = bookshelf.model("Role", {
 
 const User = bookshelf.model("User", {
   tableName: "Users",
+  hasTimestamps: ['createdAt', 'updatedAt'],
   Posts() {
     return this.hasMany("Post");
   },

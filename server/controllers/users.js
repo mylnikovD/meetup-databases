@@ -33,13 +33,32 @@ const createUserSequelize = async (req, res) => {
   }
 };
 
-const getUserBS = async (req, res) => {
+const getUsersBS = async (req, res) => {
   try {
     const { limit, offset, name } = req.query;
     const users = await UserBS.where("fullname", "LIKE", `%${name}%`)
       .orderBy("id", "ASC")
-      .fetchAll({ require: true, withRelated: ["Role"], limit, offset });
+      .fetchPage({
+        require: true,
+        withRelated: ["Role"],
+        limit,
+        offset,
+        columns: ["id", "fullname", "age", "username", "email", "roleID"]
+      });
     return res.status(200).send(users);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+};
+
+const createUserBS = async (req, res) => {
+  try {
+    const newUserData = req.body;
+    const newUser = await UserBS.forge({
+      ...newUserData,
+    }).save();
+    console.log(newUser);
+    return res.status(200).send(newUser);
   } catch (error) {
     return res.status(500).send(error.message);
   }
@@ -48,5 +67,6 @@ const getUserBS = async (req, res) => {
 module.exports = {
   getUsersSequelize,
   createUserSequelize,
-  getUserBS
+  getUsersBS,
+  createUserBS
 };

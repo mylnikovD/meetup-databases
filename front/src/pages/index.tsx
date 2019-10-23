@@ -17,7 +17,8 @@ const App: React.FC = () => {
   const [selectedTab, setSelectedTab] = React.useState(0);
 
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setSelectedTab(newValue);
+    setPosts([])
+    return setSelectedTab(newValue);
   };
 
   useEffect(() => {
