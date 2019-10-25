@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const UserApi = require("../models").User;
-const { User: UserBS, knex } = require("../bookshelf");
+const { User: UserBS, } = require("../bookshelf");
 
 const getUsersSequelize = async (req, res) => {
   try {

@@ -16,6 +16,7 @@ const bookshelf = require("bookshelf")(knex);
 
 const Role = bookshelf.model("Role", {
   tableName: "Roles",
+  hasTimestamps: ['createdAt', 'updatedAt'],
   Users() {
     return this.hasMany(User);
   }
@@ -34,6 +35,7 @@ const User = bookshelf.model("User", {
 
 const Post = bookshelf.model("Post", {
   tableName: "Posts",
+  hasTimestamps: ['createdAt', 'updatedAt'],
   user() {
     return this.belongsTo(User, 'authorID');
   }

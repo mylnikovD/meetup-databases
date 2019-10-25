@@ -1,5 +1,7 @@
 const db = require("../models");
 const PostApi = db.Post;
+const { Post: PostBS, } = require("../bookshelf");
+
 
 const getPostsSequelize = async (req, res) => {
   try {
@@ -53,8 +55,32 @@ const deletePostSequelize = async (req, res) => {
   }
 };
 
+const getPostsBS = async (req, res) => {
+  try {
+    const { authorID } = req.query;
+    const posts = await PostBS.where('authorID', authorID).fetchAll();
+    return res.status(200).send(posts);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+const updatePostBS = async (req,res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+
+    const updatedPost = PostBS.where('id', id)
+
+  } catch (error) {
+    return res.status(500).send(error.message);
+    
+  }
+}
+
 module.exports = {
   getPostsSequelize,
   updatePostSequelize,
-  deletePostSequelize
+  deletePostSequelize,
+  getPostsBS
 };
