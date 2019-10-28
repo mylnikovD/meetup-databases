@@ -1,7 +1,6 @@
 const db = require("../models");
 const PostApi = db.Post;
-const { Post: PostBS, } = require("../bookshelf");
-
+const { Post: PostBS, bookshelf, knex } = require("../bookshelf");
 
 const getPostsSequelize = async (req, res) => {
   try {
@@ -28,7 +27,7 @@ const updatePostSequelize = async (req, res) => {
         { content: value },
         { where: { id }, transaction: t, returning: true, plain: true }
       );
-      if (post[1].id === 28) throw new Error("Rollback initiated");
+      if (post[1].id === 28) throw new Error("Rollback initiated by Sequelize");
       return post;
     });
     res.status(200).send(updatedPost);
@@ -47,7 +46,7 @@ const deletePostSequelize = async (req, res) => {
       await t.commit();
     } else {
       await t.rollback();
-      return res.status(403).send("Rollback initiated");
+      return res.status(403).send("Rollback initiated by Sequelize");
     }
     return res.status(200).send("ok");
   } catch (error) {
@@ -58,29 +57,82 @@ const deletePostSequelize = async (req, res) => {
 const getPostsBS = async (req, res) => {
   try {
     const { authorID } = req.query;
-    const posts = await PostBS.where('authorID', authorID).fetchAll();
+    const posts = await PostBS.where("authorID", authorID)
+      .orderBy("id", "ASC")
+      .fetchAll();
     return res.status(200).send(posts);
   } catch (error) {
     return res.status(500).send(error.message);
   }
-}
+};
 
-const updatePostBS = async (req,res) => {
+const updatePostBS = async (req, res) => {
   try {
     const { id } = req.params;
     const { value } = req.body;
-
-    const updatedPost = PostBS.where('id', id)
-
+    const updatedPost = await new Promise((resolve, reject) => {
+      bookshelf
+        .transaction(async t => {
+          try {
+            const model = await PostBS.where({ id }).save(
+              { content: value },
+              { transacting: t, patch: true, method: "update" }
+            );
+            if (model.attributes.id === 28) {
+              throw new Error("Rollback initiated by bookshelf");
+            }
+            resolve(model);
+          } catch (error) {
+            throw error;
+          }
+        })
+        .catch(err => reject(err));
+    });
+    return res.status(200).send(updatedPost);
   } catch (error) {
     return res.status(500).send(error.message);
-    
   }
-}
+};
+
+const deletePostBS = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const trx = await bookshelf.transaction();
+    trx("Posts")
+      .delete()
+      .where("id", id)
+      .then(() => {
+        if (id != 2) {
+          trx.commit();
+          return res.status(200).send("ok");
+        }
+        throw new Error("Rollback initiated by bookshelf");
+      })
+      .catch(error => {
+        trx.rollback();
+        return res.status(500).send(error.message);
+      });
+    // const deletedPost = await new PostBS({ id })
+    //   .destroy({ transacting: t })
+    //   .then(async post => {
+    //     if (id === '21') {
+    //       console.log('here my dude');
+    //       await t.rollback()
+    //       return;
+    //     }
+    //     await t.commit();
+    //     return post;
+    //   });
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+};
 
 module.exports = {
   getPostsSequelize,
   updatePostSequelize,
   deletePostSequelize,
-  getPostsBS
+  getPostsBS,
+  updatePostBS,
+  deletePostBS
 };

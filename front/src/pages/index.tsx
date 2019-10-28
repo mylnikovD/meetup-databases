@@ -57,13 +57,20 @@ const App: React.FC = () => {
 
   const editPost = async (type: string, postID: number, value: string) => {
     const updatedPost = await api.editPost(type, postID, value);
-    if (!updatedPost || !updatedPost.length) return;
+    if (!updatedPost) return;
     return setPosts(prevPosts =>
       prevPosts.map(prevPost => {
-        if (prevPost.id === updatedPost[1].id) {
-          return updatedPost[1];
+        if (updatedPost.length) {
+          if (prevPost.id === updatedPost[1].id) {
+            return updatedPost[1];
+          }
+          return prevPost;
+        } else {
+          if (prevPost.id === updatedPost.id) {
+            return updatedPost;
+          }
+          return prevPost;
         }
-        return prevPost;
       })
     );
   };
@@ -90,7 +97,6 @@ const App: React.FC = () => {
         >
           <Tab label="Sequelize" />
           <Tab label="Bookshelf/Knex" />
-          <Tab label="Item Three" />
         </Tabs>
       </AppBar>
       {selectedTab === 0 && (
